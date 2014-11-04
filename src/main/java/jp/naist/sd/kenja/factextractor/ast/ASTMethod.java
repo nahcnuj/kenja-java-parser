@@ -1,5 +1,6 @@
 package jp.naist.sd.kenja.factextractor.ast;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 import jp.naist.sd.kenja.factextractor.Blob;
@@ -72,6 +73,9 @@ public class ASTMethod implements Treeable {
     isConstructor = node.isConstructor();
     setBody(node);
     setParameters(node.parameters());
+		
+    int methodModifiers = node.getModifiers();
+    setModifiers(methodModifiers);
   }
 
   /**
