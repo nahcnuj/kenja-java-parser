@@ -1,21 +1,19 @@
 package jp.naist.sd.kenja.factextractor.ast;
 
-import java.lang.reflect.Modifier;
-import java.util.List;
-
 import jp.naist.sd.kenja.factextractor.Blob;
 import jp.naist.sd.kenja.factextractor.Tree;
 import jp.naist.sd.kenja.factextractor.Treeable;
-
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+
+import java.lang.reflect.Modifier;
+import java.util.List;
 
 /**
  * A class which represents Method of Java for Historage.
  *
  * @author Kenji Fujiwara
- *
  */
 public class ASTMethod implements Treeable {
 
@@ -55,14 +53,14 @@ public class ASTMethod implements Treeable {
   private static final String PARAMETERS_BLOB_NAME = "parameters";
 
   /**
-   * file name of method modifiers.
-   */
-  private static final String MODIFIERS_BLOB_NAME = "modifiers";
-
-  /**
    * file name of method return type.
    */
   private static final String RETURN_BLOB_NAME = "return";
+
+  /**
+   * file name fo method modifiers.
+   */
+  private static final String MODIFIERS_BLOB_NAME = "modifiers";
 
   /**
    * True if method is a constructor.
@@ -84,8 +82,7 @@ public class ASTMethod implements Treeable {
   /**
    * Factory method of ASTMethod from MethodDeclaration of Eclipse AST.
    *
-   * @param node
-   *          MethodDeclaration of Eclipse AST
+   * @param node MethodDeclaration of Eclipse AST
    */
   protected ASTMethod(MethodDeclaration node) {
     rootTreeName = getTreeName(node);
@@ -95,8 +92,9 @@ public class ASTMethod implements Treeable {
     setBody(node);
     setParameters(node.parameters());
 
-    if (!isConstructor) {
-      setReturnType(node.getReturnType2());
+    Type returnType = node.getReturnType2();
+    if (returnType != null) {
+      setReturnType(returnType);
     }
 
     int methodModifiers = node.getModifiers();
@@ -106,8 +104,7 @@ public class ASTMethod implements Treeable {
   /**
    * Return root tree name.
    *
-   * @param node
-   *          MethodDeclaration of Eclipse AST
+   * @param node MethodDeclaration of Eclipse AST
    * @return name of root tree
    */
   private String getTreeName(MethodDeclaration node) {
@@ -134,8 +131,7 @@ public class ASTMethod implements Treeable {
   /**
    * Read and set method body to the Blob.
    *
-   * @param node
-   *          MethodDeclaration of Eclipse AST
+   * @param node MethodDeclaration of Eclipse AST
    */
   private void setBody(MethodDeclaration node) {
     body = new Blob(BODY_BLOB_NAME);
@@ -151,8 +147,7 @@ public class ASTMethod implements Treeable {
   /**
    * Read and set method parameters to the Blob.
    *
-   * @param parametersList
-   *          list of parameters
+   * @param parametersList list of parameters
    */
   private void setParameters(List parametersList) {
     parameters = new Blob(PARAMETERS_BLOB_NAME);
@@ -175,7 +170,6 @@ public class ASTMethod implements Treeable {
    * Read and set method modifiers to the Blob.
    *
    * @param modifiers_num
-   *
    */
   private void setModifiers(int modifiers_num) {
     modifiers = new Blob(MODIFIERS_BLOB_NAME);
@@ -195,8 +189,7 @@ public class ASTMethod implements Treeable {
   /**
    * Read and set method return type to the Blob.
    *
-   * @param returnType
-   *          type of return value
+   * @param returnType type of return value
    */
   private void setReturnType(Type returnType) {
     returns = new Blob(RETURN_BLOB_NAME);
@@ -217,8 +210,7 @@ public class ASTMethod implements Treeable {
   /**
    * avoid conflicting blob name.
    *
-   * @param number
-   *          unique number of conflicted method
+   * @param number unique number of conflicted method
    */
   public void conflict(int number) {
     StringBuilder builder = new StringBuilder();
@@ -240,8 +232,7 @@ public class ASTMethod implements Treeable {
   /**
    * Factory method of ASTMethod.
    *
-   * @param node
-   *          MethodDeclaration of Eclipse AST
+   * @param node MethodDeclaration of Eclipse AST
    * @return ASTMethod instance created from MethodDeclaration
    */
   public static ASTMethod fromMethodDeclaralation(MethodDeclaration node) {
