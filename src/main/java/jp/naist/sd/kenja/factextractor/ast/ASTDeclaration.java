@@ -53,45 +53,7 @@ public class ASTDeclaration extends ASTType {
 
     root.append(generateModifierBlob(declaration.modifiers()));
 
-    ASTField fields = new ASTField();
-    Multimap<String, ASTMethod> methodMap = HashMultimap.create();
-
-    Tree constructors = new Tree(CONSTURCTOR_ROOT_NAME);
-    Tree innerClasses = null;
-
-    for (Object obj : declaration.bodyDeclarations()) {
-      if (obj instanceof FieldDeclaration) {
-        FieldDeclaration fieldDeclaration = (FieldDeclaration) obj;
-        fields.parseFieldDeclaration(fieldDeclaration);
-      } else if (obj instanceof MethodDeclaration) {
-        MethodDeclaration methodDeclaration = (MethodDeclaration) obj;
-        ASTMethod method = ASTMethod.fromMethodDeclaralation(methodDeclaration);
-        if (methodDeclaration.isConstructor()) {
-          constructors.append(method.getTree());
-        } else {
-          methodRoot.append(method.getTree());
-          if (methodMap.containsKey(method.getName())) {
-            int numConflicted = 0;
-            for (ASTMethod astMethod : methodMap.get(method.getName())) {
-              astMethod.conflict(numConflicted++);
-            }
-            method.conflict(numConflicted);
-          }
-          methodMap.put(method.getName(), method);
-        }
-      } else if (obj instanceof TypeDeclaration) {
-        TypeDeclaration typeDeclaration = (TypeDeclaration) obj;
-        if (innerClasses == null) {
-          innerClasses = new Tree(INNER_CLASS_ROOT_NAME);
-          root.append(innerClasses);
-        }
-        innerClasses.append(ASTClass.fromTypeDeclaration(typeDeclaration).getTree());
-      }
-    }
-
-    Tree fieldTree = new Tree(FIELD_ROOT_NAME);
-    fieldTree.addAll(fields.getBlobs());
-    root.append(fieldTree);
+    appendBodyDeclarations(declaration.bodyDeclarations());
   }
 
   private static Blob generateModifierBlob(List modifiers) {
@@ -139,6 +101,55 @@ public class ASTDeclaration extends ASTType {
   private static String getStringOfConstantExpression(Expression expression) {
     Object value = expression.resolveConstantExpressionValue();
     return value != null ? value.toString() : expression.toString();
+  }
+
+  /**
+   * Append body declarations to tree.
+   */
+  protected void appendBodyDeclarations(List declarations) {
+    ASTField fields = new ASTField();
+    Multimap<String, ASTMethod> methodMap = HashMultimap.create();
+
+    Tree constructors = new Tree(CONSTURCTOR_ROOT_NAME);
+    Tree fieldTree = null;
+    Tree innerClasses = null;
+
+    for (Object obj : declarations) {
+      if (obj instanceof FieldDeclaration) {
+        if (fieldTree == null) {
+          fieldTree = new Tree(FIELD_ROOT_NAME);
+        }
+        FieldDeclaration fieldDeclaration = (FieldDeclaration) obj;
+        fields.parseFieldDeclaration(fieldDeclaration);
+      } else if (obj instanceof MethodDeclaration) {
+        MethodDeclaration methodDeclaration = (MethodDeclaration) obj;
+        ASTMethod method = ASTMethod.fromMethodDeclaralation(methodDeclaration);
+        if (methodDeclaration.isConstructor()) {
+          constructors.append(method.getTree());
+        } else {
+          methodRoot.append(method.getTree());
+          if (methodMap.containsKey(method.getName())) {
+            int numConflicted = 0;
+            for (ASTMethod astMethod : methodMap.get(method.getName())) {
+              astMethod.conflict(numConflicted++);
+            }
+            method.conflict(numConflicted);
+          }
+          methodMap.put(method.getName(), method);
+        }
+      } else if (obj instanceof TypeDeclaration) {
+        TypeDeclaration typeDeclaration = (TypeDeclaration) obj;
+        if (innerClasses == null) {
+          innerClasses = new Tree(INNER_CLASS_ROOT_NAME);
+          root.append(innerClasses);
+        }
+        innerClasses.append(ASTClass.fromTypeDeclaration(typeDeclaration).getTree());
+      }
+    }
+    if (fieldTree != null) {
+      fieldTree.addAll(fields.getBlobs());
+      root.append(fieldTree);
+    }
   }
 
   /**
