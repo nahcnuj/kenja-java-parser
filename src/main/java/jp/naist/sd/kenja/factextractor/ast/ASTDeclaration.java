@@ -19,6 +19,11 @@ public class ASTDeclaration extends ASTType {
   private static final String MODIFIERS_BLOB_NAME = "modifiers";
 
   /**
+   * file name of implemented interfaces.
+   */
+  private static final String IMPLEMENT_BLOB_NAME = "implement";
+
+  /**
    * Name of root directory which store fields.
    */
   private static final String FIELD_ROOT_NAME = "[FE]";
@@ -43,7 +48,7 @@ public class ASTDeclaration extends ASTType {
    *
    * @param declaration AbstractTypeDeclaration class of Eclipse AST.
    */
-  public ASTDeclaration(AbstractTypeDeclaration declaration) {
+  protected ASTDeclaration(AbstractTypeDeclaration declaration) {
     super(declaration.getName().toString());
 
     root.append(generateModifierBlob(declaration.modifiers()));
@@ -89,7 +94,7 @@ public class ASTDeclaration extends ASTType {
     root.append(fieldTree);
   }
 
-  protected static Blob generateModifierBlob(List modifiers) {
+  private static Blob generateModifierBlob(List modifiers) {
     StringBuilder blobBody = new StringBuilder();
     for (Object obj : modifiers) {
       if (!(obj instanceof IExtendedModifier)) {
@@ -126,16 +131,6 @@ public class ASTDeclaration extends ASTType {
   }
 
   /**
-   * Factory Method of ASTClass.
-   *
-   * @param node A TypeDeclaration of the class.
-   * @return ASTClass which is corresponding to node.
-   */
-  public static ASTDeclaration fromTypeDeclaration(TypeDeclaration node) {
-    return new ASTDeclaration(node);
-  }
-
-  /**
    * Return string of expression if the expression is constant in compile-time, or string for debugging otherwise.
    *
    * @param expression expression
@@ -144,5 +139,22 @@ public class ASTDeclaration extends ASTType {
   private static String getStringOfConstantExpression(Expression expression) {
     Object value = expression.resolveConstantExpressionValue();
     return value != null ? value.toString() : expression.toString();
+  }
+
+  /**
+   * Append super interfaces to tree if implements some ones.
+   *
+   * @param interfaces list of super interfaces
+   */
+  protected void appendSuperInterfaces(List interfaces) {
+    if (!interfaces.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      for (Object obj : interfaces) {
+        Type interfaceType = (Type) obj;
+        sb.append(interfaceType.toString())
+            .append("\n");
+      }
+      root.append(new Blob(sb.toString(), IMPLEMENT_BLOB_NAME));
+    }
   }
 }

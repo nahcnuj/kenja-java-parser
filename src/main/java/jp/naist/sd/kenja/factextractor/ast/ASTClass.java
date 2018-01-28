@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Kenji Fujiwara
  */
-public class ASTClass extends ASTDeclaration {
+public final class ASTClass extends ASTDeclaration {
   /**
    * file name of extended class.
    */
@@ -24,16 +24,11 @@ public class ASTClass extends ASTDeclaration {
   private static final String TYPE_PARAMETERS_BLOB_NAME = "typeparameters";
 
   /**
-   * file name of implemented interfaces.
-   */
-  private static final String IMPLEMENT_BLOB_NAME = "implement";
-
-  /**
    * Construct ASTClass from Eclipse AST TypeDeclaration class.
    *
    * @param declaration TypeDeclaration class of Eclipse AST.
    */
-  protected ASTClass(TypeDeclaration declaration) {
+  private ASTClass(TypeDeclaration declaration) {
     super(declaration);
 
     List typeParameters = declaration.typeParameters();
@@ -43,10 +38,10 @@ public class ASTClass extends ASTDeclaration {
         TypeParameter param = (TypeParameter) obj;
         // todo modifier
         // param.modifiers()
-        // todo type bounds
-        // param.typeBounds()
         sb.append(param.getName().getIdentifier())
             .append("\n");
+        // todo type bounds
+        // param.typeBounds()
       }
       root.append(new Blob(sb.toString(), TYPE_PARAMETERS_BLOB_NAME));
     }
@@ -56,16 +51,7 @@ public class ASTClass extends ASTDeclaration {
       root.append(new Blob(superclassType.toString() + "\n", EXTEND_BLOB_NAME));
     }
 
-    List superInterfaces = declaration.superInterfaceTypes();
-    if (!superInterfaces.isEmpty()) {
-      StringBuilder sb = new StringBuilder();
-      for (Object obj : superInterfaces) {
-        Type interfaceType = (Type) obj;
-        sb.append(interfaceType.toString())
-            .append("\n");
-      }
-      root.append(new Blob(sb.toString(), IMPLEMENT_BLOB_NAME));
-    }
+    appendSuperInterfaces(declaration.superInterfaceTypes());
   }
 
   /**
