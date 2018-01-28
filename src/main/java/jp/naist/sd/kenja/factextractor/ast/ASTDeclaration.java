@@ -78,9 +78,9 @@ public class ASTDeclaration extends ASTType {
         TypeDeclaration typeDeclaration = (TypeDeclaration) obj;
         if (innerClasses == null) {
           innerClasses = new Tree(INNER_CLASS_ROOT_NAME);
-          innerClasses.append(ASTClass.fromTypeDeclaration(typeDeclaration).getTree());
           root.append(innerClasses);
         }
+        innerClasses.append(ASTClass.fromTypeDeclaration(typeDeclaration).getTree());
       }
     }
 
