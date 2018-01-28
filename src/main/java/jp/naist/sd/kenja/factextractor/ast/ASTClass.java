@@ -1,121 +1,75 @@
 package jp.naist.sd.kenja.factextractor.ast;
 
-//import java.util.HashSet;
-
 import jp.naist.sd.kenja.factextractor.Blob;
-import jp.naist.sd.kenja.factextractor.Tree;
-
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-//import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.List;
 
 /**
  * A class which represents Class of Java for Historage.
- * 
+ *
  * @author Kenji Fujiwara
  */
-public class ASTClass extends ASTType {
+public class ASTClass extends ASTDeclaration {
+  /**
+   * file name of extended class.
+   */
+  private static final String EXTEND_BLOB_NAME = "extend";
 
   /**
-   * Name of root directory which store fields.
+   * file name of type parameters.
    */
-  private static final String FIELD_ROOT_NAME = "[FE]";
+  private static final String TYPE_PARAMETERS_BLOB_NAME = "typeparameters";
 
   /**
-   * Name of root directory which store constructors.
+   * file name of implemented interfaces.
    */
-  private static final String CONSTURCTOR_ROOT_NAME = "[CS]";
-
-  /**
-   * Name of root directory which store inner classes.
-   */
-  private static final String INNER_CLASS_ROOT_NAME = "[CN]";
-
-  /**
-   * root Tree of fields.
-   */
-  private Tree fieldRoot = new Tree(FIELD_ROOT_NAME);
-
-  /**
-   * root Tree of constructors.
-   */
-  private Tree constructorRoot = new Tree(CONSTURCTOR_ROOT_NAME);
-
-  /**
-   * root Tree of inner classes.
-   */
-  private Tree innerClassRoot = new Tree(INNER_CLASS_ROOT_NAME);
-
-  /**
-   * Blob which represents super class of the class.
-   */
-  private Blob superClass = null;
+  private static final String IMPLEMENT_BLOB_NAME = "implement";
 
   /**
    * Construct ASTClass from Eclipse AST TypeDeclaration class.
-   * 
-   * @param typeDec
-   *          TypeDeclaration class of Eclipse AST.
+   *
+   * @param declaration TypeDeclaration class of Eclipse AST.
    */
-  protected ASTClass(TypeDeclaration typeDec) {
-    super(typeDec.getName().toString());
+  protected ASTClass(TypeDeclaration declaration) {
+    super(declaration);
 
-    if (typeDec.getSuperclassType() != null) {
-      superClass = new Blob("extend");
-      superClass.setBody(typeDec.getSuperclassType().toString() + "\n");
-      root.append(superClass);
-    }
-
-    root.append(fieldRoot);
-    root.append(constructorRoot);
-
-    Multimap<String, ASTMethod> methodMap = HashMultimap.create();
-    for (MethodDeclaration methodDec : typeDec.getMethods()) {
-      ASTMethod method = ASTMethod.fromMethodDeclaralation(methodDec);
-
-      if (method.isConstructor()) {
-        constructorRoot.append(method.getTree());
-      } else {
-        methodRoot.append(method.getTree());
-        if (methodMap.containsKey(method.getName())) {
-          int numConflicted = 0;
-          for (ASTMethod astMethod : methodMap.get(method.getName())) {
-            astMethod.conflict(numConflicted++);
-          }
-          method.conflict(numConflicted);
-        }
-        methodMap.put(method.getName(), method);
+    List typeParameters = declaration.typeParameters();
+    if (!typeParameters.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      for (Object obj : typeParameters) {
+        TypeDeclaration param = (TypeDeclaration) obj;
+        sb.append(param.getName().getIdentifier())
+            .append("\n");
       }
+      root.append(new Blob(sb.toString(), TYPE_PARAMETERS_BLOB_NAME));
     }
 
-    ASTField astField = new ASTField();
-    for (FieldDeclaration fieldDec : typeDec.getFields()) {
-      astField.parseFieldDeclaration(fieldDec);
+    Type superclassType = declaration.getSuperclassType();
+    if (superclassType != null) {
+      root.append(new Blob(superclassType.toString() + "\n", EXTEND_BLOB_NAME));
     }
-    fieldRoot.addAll(astField.getBlobs());
 
-    if (typeDec.getTypes().length > 0) {
-      root.append(innerClassRoot);
-      for (TypeDeclaration innerTypeDec : typeDec.getTypes()) {
-        ASTClass innnerClass = ASTClass.fromTypeDeclaration(innerTypeDec);
-        innerClassRoot.append(innnerClass.getTree());
+    List superInterfaces = declaration.superInterfaceTypes();
+    if (!superInterfaces.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      for (Object obj : superInterfaces) {
+        Type interfaceType = (Type) obj;
+        sb.append(interfaceType.toString())
+            .append("\n");
       }
+      root.append(new Blob(sb.toString(), IMPLEMENT_BLOB_NAME));
     }
   }
 
   /**
    * Factory Method of ASTClass.
-   * 
-   * @param node
-   *          A TypeDeclaration of the class.
+   *
+   * @param node A TypeDeclaration of the class.
    * @return ASTClass which is corresponding to node.
    */
   public static ASTClass fromTypeDeclaration(TypeDeclaration node) {
     return new ASTClass(node);
   }
-
 }
