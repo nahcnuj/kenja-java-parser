@@ -39,6 +39,11 @@ public class ASTDeclaration extends ASTType {
   private static final String INNER_CLASS_ROOT_NAME = "[CN]";
 
   /**
+   * Name of root directory which store inner enums.
+   */
+  private static final String INNER_ENUM_ROOT_NAME = "[EN]";
+
+  /**
    * A Blob instance corresponding to enum modifiers.
    */
   private Blob modifiers;
@@ -54,6 +59,19 @@ public class ASTDeclaration extends ASTType {
     root.append(generateModifierBlob(declaration.modifiers()));
 
     appendBodyDeclarations(declaration.bodyDeclarations());
+  }
+
+  /**
+   * Construct ASTDeclaration from Eclipse AST EnumConstantDeclaration class.
+   *
+   * @param declaration EnumConstantDeclaration class of Eclipse AST.
+   */
+  protected ASTDeclaration(EnumConstantDeclaration declaration) {
+    super(declaration.getName().getIdentifier());
+
+    root.append(generateModifierBlob(declaration.modifiers()));
+
+    appendBodyDeclarations(declaration.getAnonymousClassDeclaration().bodyDeclarations());
   }
 
   private static Blob generateModifierBlob(List modifiers) {
@@ -104,6 +122,16 @@ public class ASTDeclaration extends ASTType {
   }
 
   /**
+   * Factory Method of ASTDeclaration.
+   *
+   * @param node A EnumConstantDeclaration of the class.
+   * @return ASTDeclaration which is corresponding to node.
+   */
+  public static ASTDeclaration fromEnumConstantDeclaration(EnumConstantDeclaration node) {
+    return new ASTDeclaration(node);
+  }
+
+  /**
    * Append body declarations to tree.
    */
   protected void appendBodyDeclarations(List declarations) {
@@ -113,6 +141,7 @@ public class ASTDeclaration extends ASTType {
     Tree constructors = new Tree(CONSTURCTOR_ROOT_NAME);
     Tree fieldTree = null;
     Tree innerClasses = null;
+    Tree innerEnums = null;
 
     for (Object obj : declarations) {
       if (obj instanceof FieldDeclaration) {
@@ -144,6 +173,13 @@ public class ASTDeclaration extends ASTType {
           root.append(innerClasses);
         }
         innerClasses.append(ASTClass.fromTypeDeclaration(typeDeclaration).getTree());
+      } else if (obj instanceof EnumDeclaration) {
+        EnumDeclaration enumDeclaration = (EnumDeclaration) obj;
+        if (innerEnums == null) {
+          innerEnums = new Tree(INNER_ENUM_ROOT_NAME);
+          root.append(innerEnums);
+        }
+        innerEnums.append(ASTEnum.fromTypeDeclaration(enumDeclaration).getTree());
       }
     }
     if (fieldTree != null) {
