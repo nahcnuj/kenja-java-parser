@@ -28,6 +28,10 @@ public class ASTCompilation implements Treeable {
    */
   private static final String INTERFACE_ROOT_NAME = "[IN]";
   /**
+   * Name of root directory which store enums.
+   */
+  private static final String ENUM_ROOT_NAME = "[EN]";
+  /**
    * root Tree of Java file.
    */
   private Tree root;
@@ -39,6 +43,10 @@ public class ASTCompilation implements Treeable {
    * root Tree of classes.
    */
   private Tree classRoot;
+  /**
+   * root Tree of classes.
+   */
+  private Tree enumRoot;
 
   /**
    * List of ASTClass.
@@ -112,7 +120,35 @@ public class ASTCompilation implements Treeable {
   }
 
   /**
-   * add classes and interfaces to compilation unit.
+   * returns root of enums.
+   *
+   * @return root of enums
+   */
+  private Tree getEnumRoot() {
+    if (enumRoot == null) {
+      enumRoot = new Tree(ENUM_ROOT_NAME);
+      root.append(enumRoot);
+    }
+
+    return enumRoot;
+  }
+
+  /**
+   * returns root of interfaces.
+   *
+   * @return root of interfaces
+   */
+  private Tree getInterfaceRoot() {
+    if (interfaceRoot == null) {
+      interfaceRoot = new Tree(INTERFACE_ROOT_NAME);
+      root.append(interfaceRoot);
+    }
+
+    return interfaceRoot;
+  }
+
+  /**
+   * add classes, interfaces and enums to compilation unit.
    *
    * @param unit compilation unit of Eclipse AST
    */
@@ -122,13 +158,13 @@ public class ASTCompilation implements Treeable {
       if (abstTypeDec instanceof EnumDeclaration) {
         EnumDeclaration enumDec = (EnumDeclaration) abstTypeDec;
         ASTEnum astEnum = ASTEnum.fromTypeDeclaration(enumDec);
-        getClassRoot().append(astEnum.getTree());
+        getEnumRoot().append(astEnum.getTree());
       } else {
         TypeDeclaration typeDec = (TypeDeclaration) abstTypeDec;
+        ASTClass astClass = ASTClass.fromTypeDeclaration(typeDec);
         if (typeDec.isInterface()) {
-          // ASTInterface i = ASTInterface.
+          getInterfaceRoot().append(astClass.getTree());
         } else {
-          ASTClass astClass = ASTClass.fromTypeDeclaration(typeDec);
           getClassRoot().append(astClass.getTree());
         }
       }
