@@ -101,21 +101,23 @@ public class ASTDeclaration extends ASTType {
         blobBody.append(modifier.getKeyword().toString());
       } else if (exmodifier.isAnnotation()) {
         Annotation annotation = (Annotation) exmodifier;
-        blobBody.append("@").append(annotation.getTypeName());
+        blobBody.append("@")
+            .append(annotation.getTypeName());
         if (annotation.isSingleMemberAnnotation()) {
-          Object v = annotation.resolveConstantExpressionValue();
-          String expression = v != null ? v.toString() : annotation.toString();
-          blobBody.append("(").append(expression).append(")");
+          blobBody.append("(")
+              .append(getStringOfConstantExpression(((SingleMemberAnnotation) annotation).getValue()))
+              .append(")");
         } else if (annotation.isNormalAnnotation()) {
           List<String> pairs = new ArrayList<>();
           for (Object o : ((NormalAnnotation) annotation).values()) {
             MemberValuePair pair = (MemberValuePair) o;
-            Expression value = pair.getValue();
-            Object v = value.resolveConstantExpressionValue();
-            String expression = v != null ? v.toString() : value.toString();
-            blobBody.append(pair.getName().getIdentifier()).append("=").append(expression);
+            blobBody.append(pair.getName().getIdentifier())
+                .append("=")
+                .append(getStringOfConstantExpression(pair.getValue()));
           }
-          blobBody.append("(").append(String.join(",", pairs)).append(")");
+          blobBody.append("(")
+              .append(String.join(",", pairs))
+              .append(")");
         }
       }
       blobBody.append("\n");
@@ -131,5 +133,16 @@ public class ASTDeclaration extends ASTType {
    */
   public static ASTDeclaration fromTypeDeclaration(TypeDeclaration node) {
     return new ASTDeclaration(node);
+  }
+
+  /**
+   * Return string of expression if the expression is constant in compile-time, or string for debugging otherwise.
+   *
+   * @param expression expression
+   * @return string of constant expression or debugging string of expression otherwise
+   */
+  private static String getStringOfConstantExpression(Expression expression) {
+    Object value = expression.resolveConstantExpressionValue();
+    return value != null ? value.toString() : expression.toString();
   }
 }
