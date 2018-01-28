@@ -127,8 +127,7 @@ public class ASTCompilation implements Treeable {
         if (typeDec.isInterface()) {
           // ASTInterface i = ASTInterface.
         } else {
-          ASTDeclaration astClass = ASTDeclaration.fromTypeDeclaration(typeDec);
-          //ASTClass astClass = ASTClass.fromTypeDeclaration(typeDec);
+          ASTClass astClass = ASTClass.fromTypeDeclaration(typeDec);
           getClassRoot().append(astClass.getTree());
         }
       }
