@@ -4,10 +4,10 @@ import jp.naist.sd.kenja.factextractor.Blob;
 import jp.naist.sd.kenja.factextractor.Tree;
 import jp.naist.sd.kenja.factextractor.Treeable;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
-import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
@@ -169,21 +169,50 @@ public class ASTMethod implements Treeable {
   /**
    * Read and set method modifiers to the Blob.
    *
-   * @param modifiers_num
+   * @param modifiersNum modifiers
    */
-  private void setModifiers(int modifiers_num) {
+  private void setModifiers(int modifiersNum) {
     modifiers = new Blob(MODIFIERS_BLOB_NAME);
     root.append(modifiers);
 
-    if (Modifier.isPrivate(modifiers_num)) {
-      modifiers.setBody("private\n");
-    } else if (Modifier.isProtected(modifiers_num)) {
-      modifiers.setBody("protected\n");
-    } else if (Modifier.isPublic(modifiers_num)) {
-      modifiers.setBody("public\n");
+    String modifierBody = "";
+    if (Modifier.isPrivate(modifiersNum)) {
+      modifierBody += "private\n";
+    } else if (Modifier.isProtected(modifiersNum)) {
+      modifierBody += "protected\n";
+    } else if (Modifier.isPublic(modifiersNum)) {
+      modifierBody += "public\n";
     } else {
-      modifiers.setBody("internal\n");
+      modifierBody += "package-private\n";
     }
+    if (Modifier.isStatic(modifiersNum)) {
+      modifierBody += "static\n";
+    }
+    if (Modifier.isAbstract(modifiersNum)) {
+      modifierBody += "abstract\n";
+    }
+    if (Modifier.isFinal(modifiersNum)) {
+      modifierBody += "final\n";
+    }
+    if (Modifier.isNative(modifiersNum)) {
+      modifierBody += "native\n";
+    }
+    if (Modifier.isSynchronized(modifiersNum)) {
+      modifierBody += "synchronized\n";
+    }
+    if (Modifier.isTransient(modifiersNum)) {
+      modifierBody += "transient\n";
+    }
+    if (Modifier.isVolatile(modifiersNum)) {
+      modifierBody += "volatile\n";
+    }
+    if (Modifier.isStrictfp(modifiersNum)) {
+      modifierBody += "strictfp\n";
+    }
+    if (Modifier.isDefault(modifiersNum)) {
+      modifierBody += "default\n";
+    }
+    modifiers.setBody(modifierBody);
   }
 
   /**
