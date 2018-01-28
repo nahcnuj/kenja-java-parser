@@ -159,14 +159,14 @@ public class ASTMethod implements Treeable {
     for (Object item : parametersList) {
       SingleVariableDeclaration parameter = (SingleVariableDeclaration) item;
       parameterBody += parameter.getType().toString();
-      parameterBody += " ";
-      parameterBody += parameter.getName();
       for (int dimension = 0; dimension < parameter.getExtraDimensions(); dimension++) {
         parameterBody += "[]";
       }
       if (parameter.isVarargs()) {
         parameterBody += "...";
       }
+      parameterBody += " ";
+      parameterBody += parameter.getName();
       parameterBody += "\n";
     }
     parameters.setBody(parameterBody);
