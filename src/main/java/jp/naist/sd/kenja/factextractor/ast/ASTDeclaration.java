@@ -6,6 +6,9 @@ import jp.naist.sd.kenja.factextractor.Blob;
 import jp.naist.sd.kenja.factextractor.Tree;
 import org.eclipse.jdt.core.dom.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A class which represents declarations of Class, Enum and enum constants in Java for Historage.
  */
@@ -43,7 +46,7 @@ public class ASTDeclaration extends ASTType {
   public ASTDeclaration(AbstractTypeDeclaration declaration) {
     super(declaration.getName().toString());
 
-    root.append(generateModifierBlob(declaration.getModifiers()));
+    root.append(generateModifierBlob(declaration.modifiers()));
 
     ASTField fields = new ASTField();
     Multimap<String, ASTMethod> methodMap = HashMultimap.create();
@@ -86,46 +89,37 @@ public class ASTDeclaration extends ASTType {
     root.append(fieldTree);
   }
 
-  protected static Blob generateModifierBlob(int modifiers) {
+  protected static Blob generateModifierBlob(List modifiers) {
     StringBuilder blobBody = new StringBuilder();
-    if (Modifier.isPrivate(modifiers)) {
-      blobBody.append("private\n");
-    } else if (Modifier.isProtected(modifiers)) {
-      blobBody.append("protected\n");
-    } else if (Modifier.isPublic(modifiers)) {
-      blobBody.append("public\n");
-    } else {
-      blobBody.append("package-private\n");
+    for (Object obj : modifiers) {
+      if (!(obj instanceof IExtendedModifier)) {
+        throw new IllegalArgumentException();
+      }
+      IExtendedModifier exmodifier = (IExtendedModifier) obj;
+      if (exmodifier.isModifier()) {
+        Modifier modifier = (Modifier) exmodifier;
+        blobBody.append(modifier.getKeyword().toString());
+      } else if (exmodifier.isAnnotation()) {
+        Annotation annotation = (Annotation) exmodifier;
+        blobBody.append("@").append(annotation.getTypeName());
+        if (annotation.isSingleMemberAnnotation()) {
+          Object v = annotation.resolveConstantExpressionValue();
+          String expression = v != null ? v.toString() : annotation.toString();
+          blobBody.append("(").append(expression).append(")");
+        } else if (annotation.isNormalAnnotation()) {
+          List<String> pairs = new ArrayList<>();
+          for (Object o : ((NormalAnnotation) annotation).values()) {
+            MemberValuePair pair = (MemberValuePair) o;
+            Expression value = pair.getValue();
+            Object v = value.resolveConstantExpressionValue();
+            String expression = v != null ? v.toString() : value.toString();
+            blobBody.append(pair.getName().getIdentifier()).append("=").append(expression);
+          }
+          blobBody.append("(").append(String.join(",", pairs)).append(")");
+        }
+      }
+      blobBody.append("\n");
     }
-
-    if (Modifier.isStatic(modifiers)) {
-      blobBody.append("static\n");
-    }
-    if (Modifier.isAbstract(modifiers)) {
-      blobBody.append("abstract\n");
-    }
-    if (Modifier.isFinal(modifiers)) {
-      blobBody.append("final\n");
-    }
-    if (Modifier.isNative(modifiers)) {
-      blobBody.append("native\n");
-    }
-    if (Modifier.isSynchronized(modifiers)) {
-      blobBody.append("synchronized\n");
-    }
-    if (Modifier.isTransient(modifiers)) {
-      blobBody.append("transient\n");
-    }
-    if (Modifier.isVolatile(modifiers)) {
-      blobBody.append("volatile\n");
-    }
-    if (Modifier.isStrictfp(modifiers)) {
-      blobBody.append("strictfp\n");
-    }
-    if (Modifier.isDefault(modifiers)) {
-      blobBody.append("default\n");
-    }
-
     return new Blob(blobBody.toString(), MODIFIERS_BLOB_NAME);
   }
 
