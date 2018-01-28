@@ -43,7 +43,7 @@ public class ASTCompilation implements Treeable {
   /**
    * List of ASTClass.
    */
-  private List<ASTClass> classes = new LinkedList<ASTClass>();
+  private List<ASTClass> classes = new LinkedList<>();
 
   /**
    * root Tree of interfaces.
@@ -121,7 +121,8 @@ public class ASTCompilation implements Treeable {
       AbstractTypeDeclaration abstTypeDec = (AbstractTypeDeclaration) obj;
       if (abstTypeDec instanceof EnumDeclaration) {
         EnumDeclaration enumDec = (EnumDeclaration) abstTypeDec;
-        System.err.println("[DEBUG] enum " + enumDec.getName().toString());
+        ASTEnum astEnum = ASTEnum.fromTypeDeclaration(enumDec);
+        getClassRoot().append(astEnum.getTree());
       } else {
         TypeDeclaration typeDec = (TypeDeclaration) abstTypeDec;
         if (typeDec.isInterface()) {
