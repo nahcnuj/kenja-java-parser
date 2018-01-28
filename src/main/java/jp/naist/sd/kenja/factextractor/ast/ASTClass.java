@@ -3,6 +3,7 @@ package jp.naist.sd.kenja.factextractor.ast;
 import jp.naist.sd.kenja.factextractor.Blob;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 
 import java.util.List;
 
@@ -39,7 +40,11 @@ public class ASTClass extends ASTDeclaration {
     if (!typeParameters.isEmpty()) {
       StringBuilder sb = new StringBuilder();
       for (Object obj : typeParameters) {
-        TypeDeclaration param = (TypeDeclaration) obj;
+        TypeParameter param = (TypeParameter) obj;
+        // todo modifier
+        // param.modifiers()
+        // todo type bounds
+        // param.typeBounds()
         sb.append(param.getName().getIdentifier())
             .append("\n");
       }
