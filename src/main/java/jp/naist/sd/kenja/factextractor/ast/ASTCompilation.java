@@ -8,7 +8,9 @@ import jp.naist.sd.kenja.factextractor.Blob;
 import jp.naist.sd.kenja.factextractor.Tree;
 import jp.naist.sd.kenja.factextractor.Treeable;
 
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 /**
@@ -127,12 +129,19 @@ public class ASTCompilation implements Treeable {
    */
   public void addTypes(CompilationUnit unit) {
     for (Object obj : unit.types()) {
-      TypeDeclaration typeDec = (TypeDeclaration) obj;
-      if (typeDec.isInterface()) {
-        // ASTInterface i = ASTInterface.
-      } else {
-        ASTClass astClass = ASTClass.fromTypeDeclaration(typeDec);
-        getClassRoot().append(astClass.getTree());
+      AbstractTypeDeclaration abstTypeDec = (AbstractTypeDeclaration) obj;
+      if (abstTypeDec instanceof EnumDeclaration) {
+        EnumDeclaration enumDec = (EnumDeclaration) abstTypeDec;
+        System.err.println("[DEBUG] enum " + enumDec.getName().toString());
+      }
+      else {
+        TypeDeclaration typeDec = (TypeDeclaration) abstTypeDec;
+        if (typeDec.isInterface()) {
+          // ASTInterface i = ASTInterface.
+        } else {
+          ASTClass astClass = ASTClass.fromTypeDeclaration(typeDec);
+          getClassRoot().append(astClass.getTree());
+        }
       }
     }
   }
