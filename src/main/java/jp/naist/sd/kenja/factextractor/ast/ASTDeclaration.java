@@ -71,7 +71,10 @@ public class ASTDeclaration extends ASTType {
 
     root.append(generateModifierBlob(declaration.modifiers()));
 
-    appendBodyDeclarations(declaration.getAnonymousClassDeclaration().bodyDeclarations());
+    AnonymousClassDeclaration anonymousClassDeclaration = declaration.getAnonymousClassDeclaration();
+    if (anonymousClassDeclaration != null) {
+      appendBodyDeclarations(anonymousClassDeclaration.bodyDeclarations());
+    }
   }
 
   private static Blob generateModifierBlob(List modifiers) {
