@@ -152,6 +152,11 @@ public class ASTCompilation implements Treeable {
   public void addTypes(CompilationUnit unit) {
     for (Object obj : unit.types()) {
       AbstractTypeDeclaration abstTypeDec = (AbstractTypeDeclaration) obj;
+      if ((abstTypeDec.getFlags() & ASTNode.MALFORMED) != 0) {
+        System.setErr(System.err);
+        System.err.println("[WARNING] Skip malformed declaration:\n" + abstTypeDec.toString());
+        continue;
+      }
       if (abstTypeDec instanceof EnumDeclaration) {
         EnumDeclaration enumDec = (EnumDeclaration) abstTypeDec;
         ASTEnum astEnum = ASTEnum.fromTypeDeclaration(enumDec);
