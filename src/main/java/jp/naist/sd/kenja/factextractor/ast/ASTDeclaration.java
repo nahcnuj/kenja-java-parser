@@ -56,7 +56,7 @@ public class ASTDeclaration extends ASTType {
   protected ASTDeclaration(AbstractTypeDeclaration declaration) {
     super(declaration.getName().toString());
 
-    root.append(generateModifierBlob(declaration.modifiers()));
+    appendModifierBlob(declaration.modifiers());
 
     appendBodyDeclarations(declaration.bodyDeclarations());
   }
@@ -69,7 +69,7 @@ public class ASTDeclaration extends ASTType {
   protected ASTDeclaration(EnumConstantDeclaration declaration) {
     super(declaration.getName().getIdentifier());
 
-    root.append(generateModifierBlob(declaration.modifiers()));
+    appendModifierBlob(declaration.modifiers());
 
     AnonymousClassDeclaration anonymousClassDeclaration = declaration.getAnonymousClassDeclaration();
     if (anonymousClassDeclaration != null) {
@@ -78,6 +78,9 @@ public class ASTDeclaration extends ASTType {
   }
 
   private static Blob generateModifierBlob(List modifiers) {
+    if (modifiers.isEmpty()) {
+      return null;
+    }
     StringBuilder blobBody = new StringBuilder();
     for (Object obj : modifiers) {
       if (!(obj instanceof IExtendedModifier)) {
@@ -132,6 +135,13 @@ public class ASTDeclaration extends ASTType {
    */
   public static ASTDeclaration fromEnumConstantDeclaration(EnumConstantDeclaration node) {
     return new ASTDeclaration(node);
+  }
+
+  private void appendModifierBlob(List modifiers) {
+    Blob blob = generateModifierBlob(modifiers);
+    if (blob != null) {
+      root.append(blob);
+    }
   }
 
   /**
