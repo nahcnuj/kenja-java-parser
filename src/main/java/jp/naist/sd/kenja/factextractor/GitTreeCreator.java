@@ -1,15 +1,9 @@
 package jp.naist.sd.kenja.factextractor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.IOException;
-
 import jp.naist.sd.kenja.factextractor.ast.ASTCompilation;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -17,6 +11,12 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepository;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Map;
 
 public class GitTreeCreator {
   private Tree root = new Tree("");
@@ -27,7 +27,11 @@ public class GitTreeCreator {
   }
 
   private void parseSourcecode(char[] src) {
-    ASTParser parser = ASTParser.newParser(AST.JLS4);
+    ASTParser parser = ASTParser.newParser(AST.JLS8);
+
+    Map options = JavaCore.getOptions();
+    options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+    parser.setCompilerOptions(options);
 
     parser.setSource(src);
 

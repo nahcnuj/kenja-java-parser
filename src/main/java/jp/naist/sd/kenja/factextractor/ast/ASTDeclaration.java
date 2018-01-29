@@ -144,6 +144,8 @@ public class ASTDeclaration extends ASTType {
     Tree innerEnums = null;
 
     for (Object obj : declarations) {
+      System.setOut(System.out);
+      System.out.printf("%s\n", obj.getClass().getName());
       if (obj instanceof FieldDeclaration) {
         if (fieldTree == null) {
           fieldTree = new Tree(FIELD_ROOT_NAME);
