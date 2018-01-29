@@ -3,10 +3,7 @@ package jp.naist.sd.kenja.factextractor.ast;
 import jp.naist.sd.kenja.factextractor.Blob;
 import jp.naist.sd.kenja.factextractor.Tree;
 import jp.naist.sd.kenja.factextractor.Treeable;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -159,6 +156,8 @@ public class ASTCompilation implements Treeable {
         EnumDeclaration enumDec = (EnumDeclaration) abstTypeDec;
         ASTEnum astEnum = ASTEnum.fromTypeDeclaration(enumDec);
         getEnumRoot().append(astEnum.getTree());
+      } else if (abstTypeDec instanceof AnnotationTypeDeclaration) {
+        // todo AnnotationTypeDeclaration
       } else {
         TypeDeclaration typeDec = (TypeDeclaration) abstTypeDec;
         ASTClass astClass = ASTClass.fromTypeDeclaration(typeDec);
@@ -169,6 +168,7 @@ public class ASTCompilation implements Treeable {
         }
       }
     }
+
   }
 
   @Override
